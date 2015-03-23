@@ -8,6 +8,8 @@ import java.util.Collections;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.app.ListActivity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -25,18 +27,52 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class MainActivity extends Activity
+public class MainActivity extends Activity implements FirstFragment.OnFragmentInteractionListener
 {
    // name of SharedPreferences XML file that stores the saved searches 
    private static final String SEARCHES = "searches";
-   
+
    private EditText queryEditText; // EditText where user enters a query
    private EditText tagEditText; // EditText where user tags a query
-   private SharedPreferences savedSearches; // user's favorite searches
+   public static SharedPreferences savedSearches; // user's favorite searches
    private ArrayList<String> tags; // list of tags for saved searches
    private ArrayAdapter<String> adapter; // binds tags to ListView
-   
+
+    public void sendTagToFragment2(String tag,String url) {
+        getFragmentManager().beginTransaction().
+                replace(R.id.fragment_holder, SecondFragment.newInstance(tag,url))
+                .addToBackStack(null)
+                .commit();
+    }
+
+    public void sendTagToMain(String tag,int which){
+        switch (which) {
+            case 0: // share
+                shareSearch(tag);
+                break;
+            case 1: // edit
+                // set EditTexts to match chosen tag and query
+                tagEditText.setText(tag);
+                queryEditText.setText(
+                        savedSearches.getString(tag, ""));
+                break;
+            case 2: // delete
+                deleteSearch(tag);
+                break;
+        }
+    }
+
+    public void onBackPressed(){
+        FragmentManager fm = getFragmentManager();
+        if(fm.getBackStackEntryCount()>0){
+            fm.popBackStack();
+        }else{
+            super.onBackPressed();
+        }
+
+    }
    // SOME Changes _ called when MainActivity is first created
    @Override
    protected void onCreate(Bundle savedInstanceState)
@@ -64,11 +100,19 @@ public class MainActivity extends Activity
          (ImageButton) findViewById(R.id.saveButton);
       saveButton.setOnClickListener(saveButtonListener);
 
+       Bundle bundle = new Bundle();
+       bundle.putStringArrayList("tags",tags);
+       FirstFragment ff = new FirstFragment();
+       ff.setArguments(bundle);
+       getFragmentManager().beginTransaction()
+               .add(R.id.fragment_holder,ff)
+               .commit();
+
       // MOVE to ListFragment _ register listener that searches Twitter when user touches a tag
       //getListView().setOnItemClickListener(itemClickListener);
       
       // MOVE to ListFragment _  set listener that allows user to delete or edit a search
-      //getListView().setOnItemLongClickListener(itemLongClickListener);
+       //getListView().setOnItemLongClickListener(itemLongClickListener);
    } // end method onCreate
 
    // NO CHANGES _  saveButtonListener saves a tag-query pair into SharedPreferences
@@ -88,7 +132,7 @@ public class MainActivity extends Activity
             
             ((InputMethodManager) getSystemService(
                Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(
-               tagEditText.getWindowToken(), 0);  
+               tagEditText.getWindowToken(), 0);
          } 
          else // display message asking user to provide a query and a tag
          {
@@ -264,7 +308,15 @@ public class MainActivity extends Activity
                preferencesEditor.apply(); // saves the changes
 
                // rebind tags ArrayList to ListView to show updated list
-               adapter.notifyDataSetChanged();                    
+               adapter.notifyDataSetChanged();
+
+                Bundle bundle = new Bundle();
+                bundle.putStringArrayList("tags",tags);
+                FirstFragment ff = new FirstFragment();
+                ff.setArguments(bundle);
+                getFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_holder,ff)
+                        .commit();
             }
          } // end OnClickListener
       ); // end call to setPositiveButton
@@ -273,7 +325,7 @@ public class MainActivity extends Activity
    } // end method deleteSearch
 
    // ADDED to set up the ListFragment
-   public ArrayAdapter<String> getAdapter(){return adapter;}
+    public ArrayAdapter<String> getAdapter(){return adapter;}
 
 } // end class MainActivity
 

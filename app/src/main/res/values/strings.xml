@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">ListFragment Twitter Search</string>
-	<string name="searchURL">http://mobile.twitter.com/search/</string>
+    <string name="searchURL">http://mobile.twitter.com/search/</string>
 	<string name="tagPrompt">Tag your query</string>
 	<string name="queryPrompt">Enter Twitter search query here</string>
 	<string name="taggedSearches">Tagged Searches</string>
@@ -20,4 +20,7 @@
    <string name="confirmMessage">Are you sure you want to delete the search \"%s\"?</string>
    <string name="delete">Delete</string>
 	<string name="missingMessage">Enter both a Twitter search query and a tag</string>
+
+<!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
